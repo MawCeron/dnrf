@@ -11,7 +11,8 @@ import (
 type Game struct {
 	posX   float32
 	posY   float32
-	offset int32
+	offset float32
+	speed  float32
 }
 
 const roadLeftLimit = 103
@@ -37,7 +38,15 @@ func (g *Game) Update() error {
 		g.posX += 1
 	}
 
-	g.offset += 2
+	if ebiten.IsKeyPressed(ebiten.KeyArrowUp) && g.speed < 6 {
+		g.speed += 0.02
+	} else if g.speed >= 0.02 && !ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
+		g.speed -= 0.02
+	} else if g.speed < 0.02 && !ebiten.IsKeyPressed(ebiten.KeyArrowUp) {
+		g.speed = 0
+	}
+
+	g.offset += g.speed
 
 	return nil
 }
@@ -47,7 +56,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	vector.FillRect(screen, roadLeftLimit-2, 0, 2, 240, color.RGBA{R: 100, G: 100, B: 100, A: 255}, false)
 	vector.FillRect(screen, roadRightLimit+auto.width, 0, 2, 240, color.RGBA{R: 100, G: 100, B: 100, A: 255}, false)
 
-	var posInicial = float32(-10) + float32(g.offset%30)
+	var posInicial = float32(-10) + float32(int32(g.offset)%30)
 	for i := 0; i < 9; i++ {
 		vector.FillRect(screen, roadCenter-2, posInicial, 2, 10, color.RGBA{R: 100, G: 100, B: 100, A: 255}, false)
 		posInicial += 30
